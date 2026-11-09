@@ -3,9 +3,13 @@
 A tracking drone keeps standoff d0 by the perceived box height. With the trained
 scale patch on the target, every frame the box is shrunk by the measured r (held
 across the approach by the EOT patch), so perceived distance = d_true / r -> the
-drone reads the target as farther and closes in -> collision. An independent depth
-anchor flags the box/anchor mismatch before impact. Grounded in real per-distance
-patch measurements (outputs/eot_rows.json), not an assumed parameter.
+drone reads the target as farther and closes in. EMPIRICALLY (see
+src/sim/behavior_probe.py) it does NOT crash and does NOT land: it settles at the
+stable equilibrium d_true = r*d0 (~46% of the commanded standoff) and PARKS there --
+a dangerous standoff VIOLATION, which becomes an actual collision only when r*d0 is
+inside the collision envelope (small d0 or a stronger patch). An independent depth
+anchor flags the box/anchor mismatch the instant the patch appears, long before the
+parking point. Grounded in real per-distance measurements (outputs/eot_rows.json).
 """
 from __future__ import annotations
 import numpy as np
