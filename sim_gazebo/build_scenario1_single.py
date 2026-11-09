@@ -26,11 +26,15 @@ open(os.path.join(d,"model.config"),"w").write('<?xml version="1.0"?>\n<model><n
 open(os.path.join(d,"model.sdf"),"w").write('<?xml version="1.0"?>\n<sdf version="1.6">\n <model name="%s">\n  <static>true</static>\n  <link name="panel">\n   <visual name="vis">\n    <geometry><box><size>0.06 0.7 0.9</size></box></geometry>\n    <material><script><uri>model://%s/materials/scripts</uri><uri>model://%s/materials/textures</uri><name>S1SPatched</name></script></material>\n   </visual>\n  </link>\n </model>\n</sdf>\n'%(name,name,name))
 print("patched target:",name)
 
-def wp(t,x,z,P=0.0):
-    return "   <waypoint><time>%.2f</time><pose>%.3f 0 %.3f 0 %.3f 0</pose></waypoint>\n"%(t,x,z,P)
-traj=(wp(0,0.2,0.2)+wp(3,0.2,Z)+wp(6,HOLD_X*0.6+0.08,Z,-0.10)+wp(8,HOLD_X,Z)
-      +wp(12,HOLD_X,Z)                                   # holding at safe 1.5 m
-      +wp(16,(HOLD_X+PARK_X)/2,Z,-0.09)+wp(20,PARK_X,Z)+wp(27,PARK_X,Z))  # fooled -> pulled in
+def wp(t,x,z,P=0.0,Y=0.0):   # pose x 0 z  roll=0 pitch=P yaw=Y
+    return "   <waypoint><time>%.2f</time><pose>%.3f 0 %.3f 0 %.3f %.3f</pose></waypoint>\n"%(t,x,z,P,Y)
+# TAKEOFF -> SEARCH(yaw-sweep, scanning) -> ACQUIRE(face target) -> FOLLOW(hold 1.5m)
+# -> fooled -> pulled past the safe line to 0.69 m
+traj=(wp(0,0.2,0.2)+wp(3,0.2,Z)                          # takeoff
+      +wp(5,0.2,Z,0,0.6)+wp(7,0.2,Z,0,-0.6)+wp(8.5,0.2,Z,0,0)  # SEARCH: yaw sweep R/L, then face +x (acquire)
+      +wp(11,HOLD_X*0.6+0.08,Z,-0.10,0)+wp(13,HOLD_X,Z,0,0)    # approach to safe standoff
+      +wp(16,HOLD_X,Z,0,0)                                 # holding at safe 1.5 m
+      +wp(20,(HOLD_X+PARK_X)/2,Z,-0.09,0)+wp(24,PARK_X,Z,0,0)+wp(30,PARK_X,Z,0,0))  # fooled -> pulled in
 drone='<actor name="drone">\n  <link name="body"><visual name="v"><geometry><mesh><uri>%s</uri></mesh></geometry></visual></link>\n  <script><loop>false</loop><auto_start>true</auto_start>\n   <trajectory id="0" type="fly">\n%s   </trajectory>\n  </script>\n </actor>\n'%(IRIS,traj)
 
 # green translucent safe-standoff line at x=HOLD_X (D0=1.5 m); drone should NOT cross it

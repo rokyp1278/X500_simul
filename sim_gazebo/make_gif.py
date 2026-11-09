@@ -14,8 +14,9 @@ for i,f in enumerate(fs):
     d.text((6,4),"Adversarial patch vs vision-follow drone (3m mocap cube)", font=font, fill=(240,240,240))
     # phase caption by progress
     p=i/max(1,n-1)
-    if p<0.33: cap="following: should hold at green safe line (1.5 m)"
-    elif p<0.6: cap="PATCH fools range -> drone crosses the safe line"
+    if p<0.28: cap="AUTONOMOUS SEARCH: yaw-sweep to find the target"
+    elif p<0.52: cap="acquired -> FOLLOW: hold at green safe line (1.5 m)"
+    elif p<0.72: cap="PATCH fools range -> drone crosses the safe line"
     else: cap="parked 0.69 m from target  (safe standoff violated 54%)"
     d.rectangle([0,im.height-22,im.width,im.height], fill=(20,20,28))
     d.text((6,im.height-19), cap, font=small, fill=(255,210,120) if p>=0.33 else (170,230,170))

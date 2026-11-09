@@ -1,70 +1,84 @@
-import os,sys,numpy as np
-ROOT=r"C:\Users\default.DESKTOP-5PUUIEJ\Desktop\adversarial_uav_demo";sys.path.insert(0,ROOT)
-from src.mission.follow_mission import Mission, Params, TAKEOFF, SEARCH, FOLLOW, SAFETY_HOLD
-import matplotlib;matplotlib.use("Agg")
+"""Visualise the FULLY AUTONOMOUS mission (src/mission/follow_mission.py): takeoff ->
+yaw-sweep SEARCH -> ACQUIRE an off-axis target -> FOLLOW (centre + hold d0) -> fooled by
+the patch -> SAFETY_HALT. Produces a top-down animated GIF and a distance profile that
+compares clean vs patched. Numbers are the 3 m-cube recipe (d0=1.5, d_safe=0.7, r=0.46).
+"""
+import os, sys, numpy as np
+ROOT = r"C:\Users\default.DESKTOP-5PUUIEJ\Desktop\adversarial_uav_demo"; sys.path.insert(0, ROOT)
+from src.mission.follow_mission import Mission, Params, SAFETY_HOLD
+import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
+from matplotlib.patches import Circle, Rectangle, Wedge
 from matplotlib.animation import FuncAnimation, PillowWriter
+OUT = os.path.join(ROOT, "outputs")
+TGT = (1.5, 2.0)        # target board location (UNKNOWN to the controller; off-axis)
 
-p=Params(); m=Mission(p=p)
-T=22.0; dt=p.dt; n=int(T/dt)
-t_patch=11.0
-log=[]
-tx=5.0
-for i in range(n):
-    t=i*dt
-    # target motion: static, then walks 5->7 (t 4..9), then static
-    if 4<=t<9: tx += 0.4*dt
-    patch_on = (t>=t_patch) and (m.state in (FOLLOW,SAFETY_HOLD))
-    gap = tx - m.x
-    vx,vz,pd,info = m.step(t, tx, patch_on, gap)
-    log.append((t, m.x, m.z, tx, gap, pd if pd else np.nan, info["state"], patch_on, info["deceived"]))
-L=np.array([(r[0],r[1],r[2],r[3],r[4],r[5],r[7],r[8]) for r in log],dtype=float)
-states=[r[6] for r in log]
-# find key times
-t_hold=next((r[0] for r in log if r[6]==SAFETY_HOLD), None)
-t_dec=next((r[0] for r in log if r[8]), None)
-print("patch t=%.1f  deceived flagged t=%s  safety-hold t=%s"%(t_patch,t_dec,t_hold))
-print("min true gap=%.2f m (d_safe=%.1f) -> contact avoided=%s"%(L[:,4].min(),p.d_safe,L[:,4].min()>=p.d_safe-0.05))
 
-# ---- animation (side view + distance plot) ----
-fig,(ax,ax2)=plt.subplots(1,2,figsize=(13,5),gridspec_kw={"width_ratios":[1.4,1]})
+def rollout(patch_on):
+    p = Params(); m = Mission(p=p); log = []; t = 0.0
+    while t < 70:
+        vx, yr, vz, info = m.step(t, TGT, patch_on)
+        log.append((t, m.x, m.y, m.z, m.yaw, info["true_gap"],
+                    info["perceived_d"] if info["perceived_d"] else np.nan,
+                    info["state"], int(info["deceived"])))
+        if info["state"] == SAFETY_HOLD and all(r[7] == SAFETY_HOLD for r in log[-25:]) and len(log) > 25:
+            break
+        t += p.dt
+    return log, p
+
+
+# ---------------- distance profile: clean vs patched ----------------
+lg_c, p = rollout(False); lg_p, _ = rollout(True)
+fig, ax = plt.subplots(figsize=(8, 4.2))
+for lg, c, lab in [(lg_c, "#1f77b4", "clean target"), (lg_p, "#d62728", "patched target")]:
+    tt = [r[0] for r in lg]; gap = [r[5] for r in lg]
+    ax.plot(tt, gap, color=c, lw=2, label="%s: true gap" % lab)
+ax.axhline(p.d0, ls=":", c="green"); ax.text(0.2, p.d0 + 0.05, "intended standoff d0=%.1fm" % p.d0, color="green", fontsize=8)
+ax.axhline(p.d_safe, ls="--", c="red"); ax.text(0.2, p.d_safe + 0.05, "safety geofence d_safe=%.1fm" % p.d_safe, color="red", fontsize=8)
+ax.set_xlabel("time (s)"); ax.set_ylabel("TRUE gap to target (m)"); ax.set_ylim(0, 3.2)
+ax.set_title("Autonomous mission: clean holds d0, patched is pulled to the geofence")
+ax.legend(fontsize=8, loc="upper right")
+plt.tight_layout(); plt.savefig(os.path.join(OUT, "autonomous_profile.png"), dpi=130)
+print("saved autonomous_profile.png")
+fc = lg_c[-1][5]; fp = lg_p[-1][5]
+print("clean final gap=%.2fm (%s)  patched final gap=%.2fm (%s, deceived=%s)"
+      % (fc, lg_c[-1][7], fp, lg_p[-1][7], any(r[8] for r in lg_p)))
+
+# ---------------- top-down animation (patched = the attack) ----------------
+lg = lg_p; L = np.array([r[:7] for r in lg], dtype=float); states = [r[7] for r in lg]
+stride = max(1, len(lg) // 110); idx = list(range(0, len(lg), stride))
+fig, ax = plt.subplots(figsize=(6.2, 6.2)); ax.set_aspect("equal")
+ax.add_patch(Rectangle((-0.6, -0.6), 3.2, 3.2, fill=False, ec="#444", lw=1.2, ls="-"))
+ax.text(-0.55, 2.68, "3 m mocap cube (top view)", fontsize=8, color="#444")
+ax.add_patch(Circle(TGT, p.d0, fill=False, ec="green", ls=":", lw=1.3))
+ax.add_patch(Circle(TGT, p.d_safe, fill=False, ec="red", ls="--", lw=1.3))
+ax.plot(*TGT, "s", ms=13, color="#b22", mec="k"); ax.text(TGT[0] + 0.08, TGT[1] + 0.08, "patched\ntarget", fontsize=8, color="#b22")
+ax.set_xlim(-0.8, 2.9); ax.set_ylim(-0.8, 2.9); ax.set_xlabel("x (m)"); ax.set_ylabel("y (m)")
+trail, = ax.plot([], [], "-", color="#1f77b4", lw=1, alpha=0.6)
+dron, = ax.plot([], [], "o", ms=9, color="#1f77b4", mec="k")
+fov = ax.add_patch(Wedge((0, 0), p.d_detect, 0, 0, color="#1f77b4", alpha=0.10))
+hdg, = ax.plot([], [], "-", color="#1f77b4", lw=2)
+txt = ax.text(-0.75, -0.75, "", fontsize=9, family="monospace",
+              bbox=dict(boxstyle="round", fc="white", ec="#aaa", alpha=0.9))
+
+
 def frame(k):
-    k=k*3
-    if k>=len(log): k=len(log)-1
-    t,dx,dz,txx,gap,pd,st,patch,dec=log[k][0],*[L[k,i] for i in range(1,6)],states[k],L[k,6],L[k,7]
-    ax.clear();ax2.clear()
-    ax.axhline(0,color="k",lw=2)  # ground
-    # target board
-    ax.add_patch(Rectangle((txx-0.1,0),0.2,2.0,color="#8a6d3b"))
-    ax.text(txx,2.15,"TARGET",ha="center",fontsize=8)
-    if patch: ax.add_patch(Rectangle((txx-0.25,0.6),0.3,0.8,color="#d62728")); ax.text(txx-0.1,1.0,"PATCH",color="w",ha="center",va="center",fontsize=7,rotation=90)
-    # standoff + safety lines
-    ax.axvline(txx-p.d0,ls="--",color="gray",alpha=.6); ax.text(txx-p.d0,2.35,"desired 3m",color="gray",ha="center",fontsize=7)
-    ax.axvline(txx-p.d_safe,ls="--",color="crimson"); ax.text(txx-p.d_safe,-0.3,"SAFETY 1.5m",color="crimson",ha="center",fontsize=7)
-    # drone
-    col={"TAKEOFF":"#1f77b4","SEARCH":"#1f77b4","FOLLOW":"#2ca02c","SAFETY_HOLD":"crimson"}[st]
-    ax.plot(dx,dz,marker="v",ms=16,color=col)
-    ax.text(dx,dz+0.25,"DRONE",ha="center",fontsize=8,color=col)
-    ax.set_xlim(-1,9);ax.set_ylim(-0.6,3);ax.set_yticks([])
-    banner={"TAKEOFF":"자율 이륙","SEARCH":"타깃 탐색","FOLLOW":"자율 추종 (3m 유지)","SAFETY_HOLD":"속아서 전진→안전선 자동정지"}[st]
-    ax.set_title("t=%.1fs  [%s] %s"%(t,st,banner),fontsize=11,color=col)
-    if dec and st!="SAFETY_HOLD": ax.text(4,2.7,"⚠ 속임 감지 (거리 불일치)",color="red",fontsize=10,ha="center")
-    # distance plot
-    ax2.plot(L[:k+1,0],L[:k+1,4],color="crimson",lw=2,label="진짜 거리(모캡)")
-    ax2.plot(L[:k+1,0],L[:k+1,5],color="orange",lw=2,ls="--",label="드론이 믿는 거리")
-    ax2.axhline(p.d0,color="gray",ls=":",alpha=.6); ax2.axhline(p.d_safe,color="crimson",ls="--",alpha=.6,label="안전선")
-    ax2.axvline(t_patch,color="purple",ls=":",alpha=.7)
-    ax2.set_xlim(0,T);ax2.set_ylim(0,8);ax2.set_xlabel("t(s)");ax2.set_ylabel("거리(m)")
-    ax2.legend(loc="upper right",fontsize=8);ax2.grid(alpha=.3);ax2.set_title("거리: 믿는 값 vs 진짜 (벌어지면=속음)",fontsize=10)
-try:
-    plt.rcParams["font.family"]="Malgun Gothic"
-except Exception: pass
-import matplotlib.font_manager as fm,glob
-for f in glob.glob(r"C:\Windows\Fonts\malgun*.ttf"): fm.fontManager.addfont(f)
-plt.rcParams["font.family"]="Malgun Gothic"
-ani=FuncAnimation(fig,frame,frames=len(log)//3,interval=80)
-out=os.path.join(ROOT,"outputs","autonomous_mission.gif")
-ani.save(out,writer=PillowWriter(fps=12));print("GIF",out)
-frame(len(log)//3-1); fig.savefig(os.path.join(ROOT,"outputs","autonomous_mission_final.png"),dpi=110,bbox_inches="tight")
-print("final PNG saved")
+    i = idx[k]; x, y, yaw, gap = L[i, 1], L[i, 2], L[i, 4], L[i, 5]
+    st = states[i]; deg = np.degrees(yaw)
+    trail.set_data(L[:i + 1, 1], L[:i + 1, 2])
+    dron.set_data([x], [y])
+    hdg.set_data([x, x + 0.35 * np.cos(yaw)], [y, y + 0.35 * np.sin(yaw)])
+    fov.set_center((x, y)); half = np.degrees(p.fov / 2)
+    fov.set_theta1(deg - half); fov.set_theta2(deg + half)
+    fov.set_color("#f0a000" if st == "SEARCH" else "#1f77b4")
+    col = {"TAKEOFF": "#888", "SEARCH": "#f0a000", "FOLLOW": "#1f77b4", "SAFETY_HOLD": "#d62728"}.get(st, "#333")
+    dron.set_color(col)
+    txt.set_text("state : %-11s\ntrue gap: %.2f m\n%s" % (
+        st, gap, "DECEIVED -> pulled past d0" if (st in ("FOLLOW", "SAFETY_HOLD") and gap < p.d0 - 0.05) else ""))
+    return trail, dron, hdg, fov, txt
+
+
+anim = FuncAnimation(fig, frame, frames=len(idx), interval=90, blit=False)
+plt.tight_layout()
+anim.save(os.path.join(OUT, "autonomous_mission.gif"), writer=PillowWriter(fps=11))
+print("saved autonomous_mission.gif", len(idx), "frames")
