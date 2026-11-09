@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!-- PLAIN geometric occluder (neutral gray), wide band to cover the TOP of the
+     bus billboard across its full width so YOLO still sees 'bus' but with a
+     SHORTER box -> perceived farther -> distance-pulling (not suppression). -->
+<sdf version="1.6">
+  <model name="patch_panel">
+    <static>true</static>
+    <link name="panel">
+      <visual name="vis">
+        <geometry><box><size>0.1 4.000 1.800</size></box></geometry>
+        <material>
+          <ambient>0.55 0.55 0.55 1</ambient>
+          <diffuse>0.55 0.55 0.55 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name="col">
+        <geometry><box><size>0.1 4.000 1.800</size></box></geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

@@ -1,0 +1,22 @@
+# 설정 기반(코드에 하드코딩 금지). clean vs patched 는 attack.enabled 로만 전환.
+target:
+  object_class: "sports ball"   # 지정 사물 (COCO 예시; 커스텀 객체/마커로 교체 가능)
+  standoff_m: 2.0               # 접근 표준거리
+episode:
+  max_steps: 1500
+  dt: 0.05
+observation:                    # 저차원 상태 (end-to-end 아님)
+  include: [rel_bearing, rel_range, det_confidence, vel, att, steps_since_detection]
+action:
+  type: velocity_setpoint       # vx, vy, vz, yaw_rate -> MAVLink
+  limits: {v_xy: 2.0, v_z: 1.0, yaw_rate: 1.0}   # 안전 경계
+reward:
+  keep_centered: 1.0
+  approach: 1.0
+  lost_target: -1.0
+  time: -0.01
+  geofence_violation: -10.0
+attack:
+  enabled: false
+  patch: {method: DPatch, target_detector: yolo, size_px: 120}
+seeds: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]   # 기존 N-seed 관례

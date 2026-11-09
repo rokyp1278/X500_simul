@@ -1,0 +1,14 @@
+# PyTorch 는 별도 설치(Blackwell/cu128):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+# 아래는 그 다음 설치. 버전은 설치 시점에 최신 안정 확인 후 고정할 것.
+ultralytics>=8.3                       # YOLOv8/v11 detector
+adversarial-robustness-toolbox>=1.18   # ART: AdversarialPatch / DPatch
+stable-baselines3>=2.3                 # PPO (기본), TD3/SAC
+gymnasium>=0.29
+pybullet                               # 트랙1 시뮬 물리/렌더 (Blackwell 무관, CPU)
+# gym-pybullet-drones 는 PyPI 없음 → 참고/동역학은 소스에서:
+#   pip install "git+https://github.com/utiasDSL/gym-pybullet-drones.git"  (선택)
+pymavlink                              # ArduPilot SITL 브리지 / rigidshift 재사용
+numpy
+opencv-python
+pyyaml

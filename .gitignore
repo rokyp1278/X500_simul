@@ -1,0 +1,25 @@
+# --- Python ---
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# --- model weights (auto-downloaded by ultralytics) ---
+yolov8n.pt
+*.engine
+
+# --- large reference CAD (download separately, see mount_design/README.md) ---
+mount_design/x500v2-frame.step
+
+# --- install / run logs, raw sim frames ---
+*.log
+/tmp/
+fpv_frames/
+
+# --- local Claude Code settings ---
+.claude/settings.local.json
+
+# --- OS ---
+.DS_Store
+Thumbs.db

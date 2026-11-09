@@ -1,0 +1,24 @@
+# 닫힌 루프 distance-pulling 시나리오 (NDSS'26 FlyTrap 재현, 시뮬 전용)
+# clean: 드론이 d0 거리 유지하며 호버 추적.
+# attack: t_attack 이후 패치가 bounding box 를 축소 -> 거리제어기가 "멀어졌다" 오판 -> 전진 -> 충돌.
+camera:
+  f_px: 600.0            # 초점거리(px)
+  target_size_m: 1.7     # 타깃 실제 크기(m) (사람/사물)
+scenario:
+  d0_m: 8.0              # 유지 거리 standoff(m)
+  kp: 0.6               # 거리제어 게인(1/s)
+  dt: 0.05              # 시뮬 스텝(s)
+  steps: 2400           # 최대 스텝 (=120s)
+  target_velocity_m_s: 0.0   # 0 = 타깃 호버
+attack:
+  t_attack_s: 5.0       # 패치 등장 시각
+  shrink_mode: progressive   # none | constant | progressive
+  r_constant: 0.5       # constant 모드: 고정 축소율
+  r_rate_per_s: 0.05    # progressive: 축소율이 초당 감소하는 양 (PDP)
+  r_min: 0.05
+collision_m: 0.5        # 충돌 판정 거리(m)
+defense:                # 랩 방어: 박스-추정거리 vs 독립 거리앵커 일관성 검사
+  enabled: true
+  anchor_noise_m: 0.1   # 독립 거리센서(depth) 잡음 std
+  tau: 0.15             # 상대 불일치 경보 임계
+seed: 0
