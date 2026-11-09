@@ -1,0 +1,96 @@
+﻿=== venv (py 3.12) ===
+=== pip upgrade ===
+Requirement already satisfied: pip in c:\users\default.desktop-5puuiej\desktop\adversarial_uav_demo\.venv\lib\site-packages (25.0.1)
+Collecting pip
+  Downloading pip-26.3-py3-none-any.whl.metadata (4.6 kB)
+Downloading pip-26.3-py3-none-any.whl (2.0 MB)
+   ---------------------------------------- 2.0/2.0 MB 26.8 MB/s eta 0:00:00
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 25.0.1
+    Uninstalling pip-25.0.1:
+      Successfully uninstalled pip-25.0.1
+Successfully installed pip-26.3
+=== torch cu128 ===
+Looking in indexes: https://download.pytorch.org/whl/cu128
+Collecting torch
+  Downloading torch-2.11.0%2Bcu128-cp312-cp312-win_amd64.whl.metadata (29 kB)
+Collecting torchvision
+  Downloading torchvision-0.26.0%2Bcu128-cp312-cp312-win_amd64.whl.metadata (5.6 kB)
+Collecting filelock (from torch)
+  Downloading filelock-4.2.4-py3-none-any.whl.metadata (2.0 kB)
+Collecting typing-extensions>=4.10.0 (from torch)
+  Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting setuptools<82 (from torch)
+  Downloading setuptools-78.1.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting sympy>=1.13.3 (from torch)
+  Using cached sympy-1.14.0-py3-none-any.whl.metadata (12 kB)
+Collecting networkx>=2.5.1 (from torch)
+  Downloading networkx-3.7-py3-none-any.whl.metadata (6.7 kB)
+Collecting jinja2 (from torch)
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting fsspec>=0.8.5 (from torch)
+  Downloading fsspec-2026.9.0-py3-none-any.whl.metadata (10 kB)
+Collecting numpy (from torchvision)
+  Downloading numpy-2.5.4-cp312-cp312-win_amd64.whl.metadata (6.6 kB)
+Collecting pillow!=8.3.*,>=5.3.0 (from torchvision)
+  Downloading pillow-13.0.0-cp312-cp312-win_amd64.whl.metadata (9.3 kB)
+Collecting mpmath<1.4,>=1.1.0 (from sympy>=1.13.3->torch)
+  Using cached mpmath-1.3.0-py3-none-any.whl.metadata (8.6 kB)
+Collecting MarkupSafe>=2.0 (from jinja2->torch)
+  Downloading markupsafe-3.0.3-cp312-cp312-win_amd64.whl.metadata (2.8 kB)
+Downloading torch-2.11.0%2Bcu128-cp312-cp312-win_amd64.whl (2753.2 MB)
+   ---------------------------------------- 2.8/2.8 GB 50.5 MB/s  0:00:26
+Downloading setuptools-78.1.0-py3-none-any.whl (1.3 MB)
+   ---------------------------------------- 1.3/1.3 MB 32.1 MB/s  0:00:00
+Downloading torchvision-0.26.0%2Bcu128-cp312-cp312-win_amd64.whl (9.6 MB)
+   ---------------------------------------- 9.6/9.6 MB 85.5 MB/s  0:00:00
+Downloading fsspec-2026.9.0-py3-none-any.whl (221 kB)
+Downloading networkx-3.7-py3-none-any.whl (2.1 MB)
+   ---------------------------------------- 2.1/2.1 MB 10.1 MB/s  0:00:00
+Downloading pillow-13.0.0-cp312-cp312-win_amd64.whl (7.3 MB)
+   ---------------------------------------- 7.3/7.3 MB 26.5 MB/s  0:00:00
+Using cached sympy-1.14.0-py3-none-any.whl (6.3 MB)
+Using cached mpmath-1.3.0-py3-none-any.whl (536 kB)
+Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading filelock-4.2.4-py3-none-any.whl (162 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading markupsafe-3.0.3-cp312-cp312-win_amd64.whl (15 kB)
+Downloading numpy-2.5.4-cp312-cp312-win_amd64.whl (12.6 MB)
+   ---------------------------------------- 12.6/12.6 MB 65.8 MB/s  0:00:00
+Installing collected packages: mpmath, typing-extensions, sympy, setuptools, pillow, numpy, networkx, MarkupSafe, fsspec, filelock, jinja2, torch, torchvision
+
+Successfully installed MarkupSafe-3.0.3 filelock-4.2.4 fsspec-2026.9.0 jinja2-3.1.6 mpmath-1.3.0 networkx-3.7 numpy-2.5.4 pillow-13.0.0 setuptools-78.1.0 sympy-1.14.0 torch-2.11.0+cu128 torchvision-0.26.0+cu128 typing-extensions-4.16.0
+=== requirements ===
+Collecting ultralytics>=8.3 (from -r C:\Users\default.DESKTOP-5PUUIEJ\Desktop\adversarial_uav_demo\requirements-win-cu128.txt (line 4))
+  Downloading ultralytics-8.4.202-py3-none-any.whl.metadata (47 kB)
+Collecting adversarial-robustness-toolbox>=1.18 (from -r C:\Users\default.DESKTOP-5PUUIEJ\Desktop\adversarial_uav_demo\requirements-win-cu128.txt (line 5))
+  Downloading adversarial_robustness_toolbox-1.20.1-py3-none-any.whl.metadata (10 kB)
+Collecting stable-baselines3>=2.3 (from -r C:\Users\default.DESKTOP-5PUUIEJ\Desktop\adversarial_uav_demo\requirements-win-cu128.txt (line 6))
+  Downloading stable_baselines3-2.9.2-py3-none-any.whl.metadata (4.9 kB)
+Collecting gymnasium>=0.29 (from -r C:\Users\default.DESKTOP-5PUUIEJ\Desktop\adversarial_uav_demo\requirements-win-cu128.txt (line 7))
+  Downloading gymnasium-1.4.0-py3-none-any.whl.metadata (9.0 kB)
+python.exe : ERROR: Ignored the following versions that require a different python version: 8.0.10 Requires-Python >=3.
+7,<=3.11; 8.0.11 Requires-Python >=3.7,<=3.11; 8.0.12 Requires-Python >=3.7,<=3.11; 8.0.13 Requires-Python >=3.7,<=3.11
+; 8.0.14 Requires-Python >=3.7,<=3.11; 8.0.15 Requires-Python >=3.7,<=3.11; 8.0.16 Requires-Python >=3.7,<=3.11; 8.0.17
+ Requires-Python >=3.7,<=3.11; 8.0.18 Requires-Python >=3.7,<=3.11; 8.0.19 Requires-Python >=3.7,<=3.11; 8.0.20 Require
+s-Python >=3.7,<=3.11; 8.0.21 Requires-Python >=3.7,<=3.11; 8.0.22 Requires-Python >=3.7,<=3.11; 8.0.23 Requires-Python
+ >=3.7,<=3.11; 8.0.24 Requires-Python >=3.7,<=3.11; 8.0.25 Requires-Python >=3.7,<=3.11; 8.0.26 Requires-Python >=3.7,<
+=3.11; 8.0.27 Requires-Python >=3.7,<=3.11; 8.0.28 Requires-Python >=3.7,<=3.11; 8.0.29 Requires-Python >=3.7,<=3.11; 8
+.0.30 Requires-Python >=3.7,<=3.11; 8.0.31 Requires-Python >=3.7,<=3.11; 8.0.32 Requires-Python >=3.7,<=3.11; 8.0.33 Re
+quires-Python >=3.7,<=3.11; 8.0.34 Requires-Python >=3.7,<=3.11; 8.0.7 Requires-Python >=3.7,<=3.11; 8.0.8 Requires-Pyt
+hon >=3.7,<=3.11; 8.0.9 Requires-Python >=3.7,<=3.11
+At line:1 char:833
++ ... ppend $log; & "$P\.venv\Scripts\python.exe" -m pip install -r "$P\req ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: Ignored ...on >=3.7,<=3.11:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ERROR: Could not find a version that satisfies the requirement gym-pybullet-drones (from versions: none)
+ERROR: No matching distribution found for gym-pybullet-drones
+=== VERIFY ===
+CUDA_AVAIL True
+ARCH ['sm_75', 'sm_80', 'sm_86', 'sm_90', 'sm_100', 'sm_120']
+DEV NVIDIA GeForce RTX 5080
+MATMUL_OK (2000, 2000)
+=== DONE ===
