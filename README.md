@@ -124,6 +124,10 @@ wsl.exe -d Ubuntu-22.04 bash -lc 'bash sim_gazebo/run_fly.sh clean'  # 자율 �
 
 ## 7. 실기 이관 — 석사생 핸드오프
 
+> **▶ 단계별 전체 설치 순서는 [`docs/JETSON_SETUP.md`](docs/JETSON_SETUP.md).**
+> (SD카드 JetPack 플래시 → Jetson용 PyTorch/YOLO → D435i → `fly_mission.py` 포팅 → 3m 큐브 시연.)
+> 아래는 요약.
+
 ### 젯슨에 올릴 것
 - **`sim_gazebo/fly_mission.py`** — 카메라→YOLO→박스높이→거리추정→속도명령(MAVLink→FC).
   시뮬의 "Gazebo 카메라" 부분만 **실제 D435i 프레임**으로 바꾸면 끝. 제어 수식 동일.
