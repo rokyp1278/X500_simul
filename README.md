@@ -18,7 +18,8 @@
 | **자율 시나리오** | 이륙→추종→패치에 속아 전진→**안전선 자동정지**(무충돌) | ✅ | `outputs/autonomous_mission.gif` |
 | **폐루프 + 방어** | 끌려듦을 독립 앵커가 즉시 포착(τ의 9배 마진) | ✅ | `outputs/closed_loop_patch.png`, `outputs/defense_study.png` |
 | **행동 관측(실측 r)** | 패치 보면 **박지도 착륙도 안 함** → **r·d0(≈표준거리의 46%)에 park** = 안전거리 침해 | ✅ | `outputs/behavior_probe.png`, `outputs/scenario1_demo.png` |
-| 라이브 **비행 모션** | SITL 수평제어 불안정 → 비행 모션은 시뮬 제약(§6) | ⚠️ | — |
+| **Gazebo 3D 데모** | 실제 iris 메시 드론이 3m 큐브에서 **안전선(1.5m) 넘어 0.69m까지** 끌려듦 | ✅ | `outputs/sim/scenario1_gazebo.gif` / `.mp4` |
+| 라이브 **비행 모션(SITL 물리)** | arducopter-gazebo lockstep 불안정 → 물리비행은 시뮬 제약(§6) | ⚠️ | — |
 
 **핵심 한 줄:** occlusion(가림)은 드론을 멈추게 할 뿐이지만, **학습된 scale 패치는 "보이되 멀게"**
 만들어 추종 드론을 **끌어당긴다** — 이것이 라이브 Gazebo 렌더까지 증명됐다.
@@ -64,13 +65,17 @@ src/
   sim/defense_study.py          방어 20-seed 수치 검증
 sim_gazebo/                     라이브 Gazebo (WSL)
   build_*.py / run_*.sh         월드 생성 + 오케스트레이션
+  build_scenario1_single.py     ★ 현실적 3m 큐브 장면(실제 iris 메시, 패치 타깃)
+  run_scenario1_single.sh       Gazebo GUI로 보기 / run_scenario1_record.sh  녹화
+  make_video.py / make_gif.py   녹화 프레임 -> mp4/GIF
   ab_measure.py / measure_single.py   라이브 박스 측정
   fly_mission.py                ★ 라이브 자율 비행 (= 젯슨 이식 대상)
 scripts/                        ★ 실험 러너 (재현용, §4)
   run_scale_patch.py / run_eot_patch.py / run_eot_robust.py
   run_closed_loop.py / run_autonomous_mission.py
 outputs/                        그림·GIF (결과물)
-  autonomous_mission.gif        ★ 자율 시나리오 데모
+  autonomous_mission.gif        ★ 자율 시나리오 데모(kinematic)
+  sim/scenario1_gazebo.gif/.mp4 ★ Gazebo 3D 데모(실제 iris 메시, 3m 큐브, 안전선 침해)
   sim/gazebo_live_result.png    ★ 라이브 박스 축소 증거
 docs/
   SCALE_PATCH_FINDINGS.md       ★ 전체 실험 상세 기록 (정독 추천)
@@ -120,11 +125,14 @@ wsl.exe -d Ubuntu-22.04 bash -lc 'bash sim_gazebo/run_fly.sh clean'  # 자율 �
 
 ## 6. 정직한 한계
 
-1. **라이브 Gazebo 비행 모션 불안정.** `gazebo-iris` lockstep SITL이 **수평 GUIDED 속도제어를
-   run마다 들쭉날쭉**(속도명령 받고도 드론이 제자리인 경우 많음; LOCAL_POSITION_NED·
-   GLOBAL_POSITION_INT 수평값이 MAVLink로 거의 안 옴). **코드·공격 문제 아님** — 한 run은 실제
-   접근(bh 162→271)했고, **실기(실제 FC+GPS/EKF)는 이 문제 없음.** 그래서 **전체 자율 시나리오는
-   kinematic 시뮬(`src/mission/follow_mission.py`, `outputs/autonomous_mission.gif`)로 확증.**
+1. **라이브 Gazebo 물리비행(SITL) 불안정.** `gazebo-iris` lockstep SITL이 **run마다 들쭉날쭉**
+   (이륙/수평이동이 됐다 안 됐다; GUI를 붙이면 소프트웨어 GL이 느려 lockstep 타이밍이 깨져 모델이
+   아예 안 움직임). **코드·공격 문제 아님** — **실기(실제 FC+GPS/EKF)는 이 문제 없음.** 그래서
+   **Gazebo 3D 데모(`outputs/sim/scenario1_gazebo.gif`)는 SITL 물리 대신 native actor로
+   실측 궤적(behavior_probe의 r≈0.46)을 재생**한다 — 드론은 **실제 iris 메시**, 타깃은 **실제
+   패치 텍스처**(라이브 YOLO 222→102px로 검증된 bus_patched.png), 거리·궤적은 **실측값**.
+   즉 "보이는 것"은 전부 실측 기반이고, 스크립트된 건 드론의 위치 시간열뿐(물리 적분이 아님).
+   전체 자율 로직은 `src/mission/follow_mission.py`(=젯슨 코드), 재생성: `sim_gazebo/run_scenario1_single.sh`(GUI 보기) · `run_scenario1_record.sh`(녹화).
 2. **물리 인쇄 패치 미완.** 패치는 디지털/Gazebo-렌더 강건까지만. **실제 프린트+실카메라+조명**
    강건(NPS 손실, 실카메라 EOT)은 다음 작업.
 3. **폐루프 "끌려듦→방어"는 측정 기반 수치/kinematic.** 라이브 비행 폐루프는 1번 때문에 미완.

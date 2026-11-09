@@ -14,3 +14,7 @@ fpv_frames/
 # --- OS ---
 .DS_Store
 Thumbs.db
+
+# gazebo recording intermediates
+outputs/sim/_g1frames/
+obs_frames/
