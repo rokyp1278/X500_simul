@@ -23,7 +23,7 @@ X500 V2에 올린 **Jetson Orin Nano Dev Kit + RealSense D435i**에서 `fly_miss
 **부팅 안 됨.** 펌웨어 `36.x` 이상이면 바로 1-A, 아니면 1-B 먼저.
 
 ### 1-A. 일반 경로 (펌웨어가 이미 36.x+)
-1. NVIDIA에서 **Orin Nano용 JetPack SD Card Image** 다운로드 (최신: JetPack 7.2.1).
+1. NVIDIA에서 **Orin Nano용 JetPack SD Card Image** 다운로드 (**JetPack 6.2.1 SD 이미지**. ⚠️ 7.x는 SD 이미지가 없고 USB ISO만 제공+ML 지원 부실 → 쓰지 말 것).
    https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit
 2. **balenaEtcher**로 256GB SD에 플래시 (Windows에서 바로 됨).
 3. SD 꽂고 전원 → Ubuntu 초기 설정(계정·언어·네트워크).

@@ -1,0 +1,25 @@
+# requirements-jetson.txt
+# Jetson Orin Nano  —  JetPack 6.2.1 / L4T R36.4.4 / CUDA 12.6 / Python 3.10
+# 2026-11-09 검증: torch.cuda.is_available() == True, torch<->numpy interop OK, 경고 0.
+#
+# ┌─ 중요 ───────────────────────────────────────────────────────────────┐
+# │ torch / torchvision 은 PyPI 가 아니라 "젯슨 전용 휠 저장소"에서 받아야  │
+# │ 한다. PyPI 휠은 CPU 전용/x86 이라 CUDA 를 못 잡는다.                    │
+# └──────────────────────────────────────────────────────────────────────┘
+#
+# 설치 순서:
+#   1) torch/torchvision (젯슨 인덱스에서):
+#        pip install --no-cache-dir torch==2.8.0 torchvision==0.23.0 \
+#            --index-url https://pypi.jetson-ai-lab.io/jp6/cu126
+#   2) 나머지:
+#        pip install --no-cache-dir -r requirements-jetson.txt \
+#            --index-url https://pypi.jetson-ai-lab.io/jp6/cu126
+
+torch==2.8.0
+torchvision==0.23.0
+numpy==1.26.4             # 반드시 <2 유지: 젯슨 torch 휠이 numpy 1.x 로 컴파일됨 (2.x 는 크래시)
+opencv-python==4.11.0.86  # 안정 4.x (비행 하드웨어에 5.x 는 피함)
+ultralytics==8.4.208      # 저장소 요구(ultralytics>=8.3) 충족
+pymavlink==2.4.50
+pyserial==3.5             # FC 시리얼 통신 (pymavlink가 /dev/ttyACM0 열 때 필요). 2026-11-10 FC 연결 검증
+pyrealsense2==2.59.1.11053 # D435i 카메라 (cp310-aarch64 휠, 소스빌드 불필요). 컬러+깊이 640x480 확인
